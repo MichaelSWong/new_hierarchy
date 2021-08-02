@@ -18,5 +18,10 @@
     "id": "19f73262-7caa-4555-975a-c54126ce6fd8",
     "userName": "test_externalid3",
     "email": "test3@email.com"
+  },
+  {
+    "id": "3bab0bd4-c2ee-48c3-9bbc-3dc188798042",
+    "userName": "Wbs_Global_Admin",
+    "email": "Wbs_Global_Admin@wongfnb.onmicrosoft.com"
   }
 ]

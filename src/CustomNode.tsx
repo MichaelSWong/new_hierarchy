@@ -24,6 +24,7 @@ import { HierarchyData, HierarchyNodeModel } from './types';
 import FunctionsData from './data/functions.json';
 import UsersData from './data/users.json';
 import LevelsData from './data/levels.json';
+import useFormStyles from './styling/form.styles';
 
 const useStyles = makeStyles({
   node: {
@@ -63,6 +64,9 @@ export const CustomNode: React.FC<Props> = (props) => {
   const [checked, setChecked] = useState(false);
   const [endDateCheck, setEndDateCheck] = useState(data?.endDate);
   const [labelLevelName, setLabelLevelName] = useState(data?.level.levelName);
+  const [labelUserName, setLabelUserName] = useState(data?.member[0].user);
+
+  const formClasses = useFormStyles();
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,6 +121,10 @@ export const CustomNode: React.FC<Props> = (props) => {
 
   const handleChangeLevel = (e: React.ChangeEvent<{ value: unknown }>) => {
     setLabelLevelName(e.target.value as string);
+  };
+
+  const handleChangeUser = (e: React.ChangeEvent<{ value: unknown }>) => {
+    setLabelUserName(e.target.value as string);
   };
 
   const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,7 +182,7 @@ export const CustomNode: React.FC<Props> = (props) => {
           </Grid>
           {/* 2.  levelName: Select Box */}
           <Grid item xs='auto'>
-            <FormControl>
+            <FormControl className={formClasses.formControl}>
               <InputLabel id='controlled-levelName-select-label'>
                 Level Name
               </InputLabel>
@@ -203,6 +211,26 @@ export const CustomNode: React.FC<Props> = (props) => {
             />
           </Grid>
           {/* //TODO  4.  User: Select Box or TextField */}
+          <FormControl className={formClasses.formControl}>
+            <InputLabel id='controlled-user-select-label'>
+              Level Name
+            </InputLabel>
+            <Select
+              labelId='controlled-user-select-label'
+              id='controlled-user-select'
+              value={labelUserName}
+              onChange={handleChangeUser}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {UsersData.map((name, index) => (
+                <MenuItem key={index} value={name.userName}>
+                  {name.userName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           {/* //TODO  5.  Function: Select Box */}
           {/* SUBMIT: Finish Editing the item */}
           <Grid item xs='auto'>
