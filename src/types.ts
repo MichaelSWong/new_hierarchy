@@ -56,13 +56,13 @@ interface IMember {
   function: IFunctions;
   user: string;
   startDate: Date | string;
-  endDate: Date | string | null;
+  endDate?: Date | string;
 }
 
 export type HierarchyData = {
   isDirtied: boolean;
   startDate: Date | string;
-  endDate: Date | string | null;
+  endDate?: Date | string;
   lastUpdate?: ILastUpdate;
   level: ILevels;
   member: IMember[];

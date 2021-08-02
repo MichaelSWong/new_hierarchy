@@ -1,64 +1,68 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { makeStyles } from "@material-ui/core/styles";
-import Box from "@material-ui/core/Box";
-import Checkbox from "@material-ui/core/Checkbox";
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import TextField from "@material-ui/core/TextField";
-import IconButton from "@material-ui/core/IconButton";
-import CheckIcon from "@material-ui/icons/Check";
-import CloseIcon from "@material-ui/icons/Close";
-import EditIcon from "@material-ui/icons/Edit";
-import AddCircleOutlineOutlinedIcon from "@material-ui/icons/AddCircleOutlineOutlined";
-import HighlightOffRoundedIcon from "@material-ui/icons/HighlightOffRounded";
+import React, { Dispatch, SetStateAction, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { makeStyles } from '@material-ui/core/styles';
+import Box from '@material-ui/core/Box';
+import Checkbox from '@material-ui/core/Checkbox';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import CheckIcon from '@material-ui/icons/Check';
+import CloseIcon from '@material-ui/icons/Close';
+import EditIcon from '@material-ui/icons/Edit';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
+import HighlightOffRoundedIcon from '@material-ui/icons/HighlightOffRounded';
 
-import { useDragOver } from "@minoru/react-dnd-treeview";
-import { HierarchyNodeModel } from "./types";
+import { NodeModel, useDragOver } from '@minoru/react-dnd-treeview';
+import { HierarchyData, HierarchyNodeModel } from './types';
+import FunctionsData from './data/functions.json';
+import UsersData from './data/users.json';
+import LevelsData from './data/levels.json';
 
 const useStyles = makeStyles({
   node: {
-    color: "#1967d2"
+    color: '#1967d2',
   },
   arrow: {
-    transform: "rotate(90deg)"
+    transform: 'rotate(90deg)',
   },
   text: {
-    width: "50ch"
-  }
+    width: '50ch',
+  },
 });
 
 type Dispatcher<S> = Dispatch<SetStateAction<S>>;
 type Props = {
-  node: HierarchyNodeModel;
+  node: NodeModel<HierarchyData>;
   isOpen: boolean;
   isSelected: boolean;
-  onToggle: (id: HierarchyNodeModel["id"]) => void;
-  onSelect: (node: HierarchyNodeModel) => void;
+  onToggle: (id: NodeModel['id']) => void;
+  onSelect: (node: NodeModel) => void;
   onTextChange: (
-    id: HierarchyNodeModel["id"],
+    id: NodeModel['id'],
     text: string,
     level: string,
-    endDate: Date | string
+    endDate: Date | string,
   ) => void;
-  selectedNode: HierarchyNodeModel | null;
-  setSelectedNode: Dispatcher<HierarchyNodeModel | null>;
-  treeData: HierarchyNodeModel[];
-  setTreeData: Dispatcher<HierarchyNodeModel[]>;
+  selectedNode: NodeModel | undefined;
+  setSelectedNode: Dispatcher<NodeModel<HierarchyData> | undefined>;
+  treeData: NodeModel<HierarchyData>[];
+  setTreeData: Dispatcher<NodeModel<HierarchyData>[]>;
 };
 
 export const CustomNode: React.FC<Props> = (props) => {
-  const {
-    id,
-    text,
-    data: { level, endDate }
-  } = props.node;
+  const { id, text, data } = props.node;
   const [visibleInput, setVisibleInput] = useState(false);
   const [labelText, setLabelText] = useState(text);
   const [checked, setChecked] = useState(false);
-  const [endDateCheck, setEndDateCheck] = useState(endDate);
-  const [labelLevelName, setLabelLevelName] = useState(level.levelName);
+  const [endDateCheck, setEndDateCheck] = useState(data?.endDate);
+  const [labelLevelName, setLabelLevelName] = useState(data?.level.levelName);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -83,36 +87,36 @@ export const CustomNode: React.FC<Props> = (props) => {
       id: uuidv4(),
       // parent: props.selectedNode!.id,
       parent: id,
-      text: "NEW NODE",
+      text: 'NEW NODE',
       droppable: true,
       data: {
         isDirtied: true,
         startDate: new Date().toISOString(),
-        endDate: null,
+        endDate: undefined,
         level: {
-          levelName: ""
+          levelName: '',
         },
         member: [
           {
-            function: { functionName: "", numberOfPosition: 0, owner: true },
-            user: "",
+            function: { functionName: '', numberOfPosition: 0, owner: true },
+            user: '',
             startDate: new Date().toISOString(),
-            endDate: null
-          }
-        ]
-      }
+            endDate: undefined,
+          },
+        ],
+      },
     };
     const newestTree = [...props.treeData, newNode];
     props.setTreeData(newestTree);
-    props.setSelectedNode(null);
+    props.setSelectedNode(undefined);
   };
 
   const handleChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLabelText(e.target.value);
   };
 
-  const handleChangeLevel = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLabelLevelName(e.target.value);
+  const handleChangeLevel = (e: React.ChangeEvent<{ value: unknown }>) => {
+    setLabelLevelName(e.target.value as string);
   };
 
   const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,32 +126,37 @@ export const CustomNode: React.FC<Props> = (props) => {
 
   const handleSubmit = () => {
     setVisibleInput(false);
-    props.onTextChange(id, labelText, labelLevelName, endDateCheck);
+    props.onTextChange(
+      id,
+      labelText,
+      labelLevelName as string,
+      endDateCheck as Date,
+    );
   };
 
   const dragOverProps = useDragOver(id, props.isOpen, props.onToggle);
   const classes = useStyles();
 
   React.useEffect(() => {
-    console.log("node", props.node);
-    console.log("VISIBLE_INPUT", visibleInput);
-    console.log("SELECTED_NODE", props.selectedNode);
-    console.log("LABEL_TEXT", labelText);
-    console.log("LABEL_LEVEL", labelLevelName);
+    console.log('node', props.node);
+    console.log('VISIBLE_INPUT', visibleInput);
+    console.log('SELECTED_NODE', props.selectedNode);
+    console.log('LABEL_TEXT', labelText);
+    console.log('LABEL_LEVEL', labelLevelName);
   }, [props.node, visibleInput, props.selectedNode, labelText, labelLevelName]);
 
   return (
     <Grid
       container
-      direction="row"
-      justifyContent="flex-start"
-      alignItems="flex-start"
+      direction='row'
+      justifyContent='flex-start'
+      alignItems='flex-start'
       spacing={1}
       {...dragOverProps}
     >
-      <Grid item xs="auto" className={props.isOpen ? classes.arrow : ""}>
+      <Grid item xs='auto' className={props.isOpen ? classes.arrow : ''}>
         {props.node.droppable && (
-          <Box component="div" onClick={handleToggle}>
+          <Box component='div' onClick={handleToggle}>
             <ArrowRightIcon />
           </Box>
         )}
@@ -155,58 +164,83 @@ export const CustomNode: React.FC<Props> = (props) => {
 
       {visibleInput ? (
         <>
-          <Grid item xs="auto">
+          {/* 1.  nodeText: TextField */}
+          <Grid item xs='auto'>
             <TextField
-              label="Name"
+              label='Name'
               value={labelText}
               onChange={handleChangeText}
             />
           </Grid>
-          <Grid item xs="auto">
-            <TextField
-              label="Level"
-              value={labelLevelName}
-              onChange={handleChangeLevel}
+          {/* 2.  levelName: Select Box */}
+          <Grid item xs='auto'>
+            <FormControl>
+              <InputLabel id='controlled-levelName-select-label'>
+                Level Name
+              </InputLabel>
+              <Select
+                labelId='controlled-levelName-select-label'
+                id='controlled-levelName-select'
+                value={labelLevelName}
+                onChange={handleChangeLevel}
+              >
+                <MenuItem value=''>
+                  <em>None</em>
+                </MenuItem>
+                {LevelsData.map((name, index) => (
+                  <MenuItem key={index} value={name.levelName}>
+                    {name.levelName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          {/* 3.  endDate: Checkbox */}
+          <Grid item xs='auto'>
+            <FormControlLabel
+              control={<Checkbox checked={checked} onChange={handleChecked} />}
+              label='EndDate'
             />
           </Grid>
-          <Grid item xs="auto">
-            <Checkbox checked={checked} onChange={handleChecked} />
-          </Grid>
-          <Grid item xs="auto">
+          {/* //TODO  4.  User: Select Box or TextField */}
+          {/* //TODO  5.  Function: Select Box */}
+          {/* SUBMIT: Finish Editing the item */}
+          <Grid item xs='auto'>
             <IconButton
-              size="small"
+              size='small'
               onClick={handleSubmit}
-              disabled={labelText === ""}
+              disabled={labelText === ''}
             >
               <CheckIcon />
             </IconButton>
           </Grid>
-          <Grid item xs="auto">
-            <IconButton size="small" aria-label="close" onClick={handleCancel}>
+          {/* Cancel: Close the edit and don't save */}
+          <Grid item xs='auto'>
+            <IconButton size='small' aria-label='close' onClick={handleCancel}>
               <HighlightOffRoundedIcon />
             </IconButton>
           </Grid>
         </>
       ) : (
         <>
-          <Grid item xs="auto" className={props.isSelected ? classes.node : ""}>
-            <Typography align="center" variant="h6">
+          <Grid item xs='auto' className={props.isSelected ? classes.node : ''}>
+            <Typography align='center' variant='h6'>
               {props.node.text}
             </Typography>
           </Grid>
-          <Grid item xs="auto">
+          <Grid item xs='auto'>
             <IconButton
-              size="small"
-              aria-label="edit node"
+              size='small'
+              aria-label='edit node'
               onClick={handleAddNode}
             >
               <AddCircleOutlineOutlinedIcon />
             </IconButton>
           </Grid>
-          <Grid item xs="auto">
+          <Grid item xs='auto'>
             <IconButton
-              size="small"
-              aria-label="edit node"
+              size='small'
+              aria-label='edit node'
               onClick={handleShowInput}
             >
               <EditIcon />
