@@ -63,7 +63,9 @@
     "@typescript-eslint/no-explicit-any": "error",
     "no-unused-vars": "warn",
     "func-names": "off",
-    "import/no-cycle": ["off"]
+    "import/no-cycle": ["off"],
+    "no-shadow": "off",
+    "@typescript-eslint/no-shadow": ["error"]
   },
   "ignorePatterns": ["/*.*"]
 }

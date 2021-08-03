@@ -19,18 +19,18 @@
       "member": [
         {
           "function": {
-            "functionName": "CML Division Bank",
+            "functionName": "Banker",
             "terminationDate": "2018-01-26T18:30:09.453+00:00",
             "owner": true,
             "numberOfPosition": 1
           },
-          "user": "Wbs_Global_Admin",
+          "user": "WBS_Admin_Test",
           "startDate": "2021-05-07T14:54:39.072Z",
           "endDate": null
         },
         {
           "function": {
-            "functionName": "CML Region Bank",
+            "functionName": "Team",
             "terminationDate": null,
             "owner": true,
             "numberOfPosition": 2
@@ -62,23 +62,23 @@
       "member": [
         {
           "function": {
-            "functionName": "CML Division Bank",
+            "functionName": "Banker",
             "terminationDate": "2018-01-26T18:30:09.453+00:00",
             "owner": true,
             "numberOfPosition": 1
           },
-          "user": "Wbs_Global_Admin",
+          "user": "WBS_Admin_Test",
           "startDate": "2021-05-07T14:54:39.072Z",
           "endDate": null
         },
         {
           "function": {
-            "functionName": "CML Region Bank",
+            "functionName": "Team",
             "terminationDate": null,
             "owner": true,
             "numberOfPosition": 2
           },
-          "user": "Wbs_Global_Admin",
+          "user": "test_externalid3",
           "startDate": "2021-05-07T14:54:39.072Z",
           "endDate": null
         }
@@ -105,23 +105,23 @@
       "member": [
         {
           "function": {
-            "functionName": "CML Division Bank",
+            "functionName": "Banker",
             "terminationDate": "2018-01-26T18:30:09.453+00:00",
             "owner": true,
             "numberOfPosition": 1
           },
-          "user": "Wbs_Global_Admin",
+          "user": "test_externalid3",
           "startDate": "2021-05-07T14:54:39.072Z",
           "endDate": null
         },
         {
           "function": {
-            "functionName": "CML Region Bank",
+            "functionName": "Team",
             "terminationDate": null,
             "owner": true,
             "numberOfPosition": 2
           },
-          "user": "Wbs_Global_Admin",
+          "user": "WidjajaD",
           "startDate": "2021-05-07T14:54:39.072Z",
           "endDate": null
         }
@@ -148,18 +148,18 @@
       "member": [
         {
           "function": {
-            "functionName": "CML Division Bank",
+            "functionName": "Banker",
             "terminationDate": "2018-01-26T18:30:09.453+00:00",
             "owner": true,
             "numberOfPosition": 1
           },
-          "user": "Wbs_Global_Admin",
+          "user": "WidjajaD",
           "startDate": "2021-05-07T14:54:39.072Z",
           "endDate": null
         },
         {
           "function": {
-            "functionName": "CML Region Bank",
+            "functionName": "Team",
             "terminationDate": null,
             "owner": true,
             "numberOfPosition": 2

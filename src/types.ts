@@ -19,7 +19,7 @@ export interface ILevels {
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 export interface IFunctions {
   functionName: string;
-  terminationDate?: Date | string | null | any;
+  terminationDate?: Date | string | null;
   numberOfPosition: number | null;
   owner: boolean;
 }
@@ -52,17 +52,17 @@ export interface ILastUpdate {
   inverseTimeStamp: number;
 }
 
-interface IMember {
+export interface IMember {
   function: IFunctions;
   user: string;
   startDate: Date | string;
-  endDate?: Date | string;
+  endDate?: Date | string | null;
 }
 
 export type HierarchyData = {
   isDirtied: boolean;
   startDate: Date | string;
-  endDate?: Date | string;
+  endDate?: Date | string | null;
   lastUpdate?: ILastUpdate;
   level: ILevels;
   member: IMember[];

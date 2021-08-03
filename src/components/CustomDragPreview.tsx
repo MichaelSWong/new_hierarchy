@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { DragLayerMonitorProps } from '@minoru/react-dnd-treeview';
-import { HierarchyData } from './types';
+import { HierarchyData } from '../types';
 
 type Props = {
   monitorProps: DragLayerMonitorProps<HierarchyData>;
@@ -27,8 +27,8 @@ const useStyles = makeStyles({
   },
 });
 
-export const CustomDragPreview: React.FC<Props> = (props) => {
-  const item = props.monitorProps.item;
+const CustomDragPreview: React.FC<Props> = ({ monitorProps }: Props) => {
+  const { item } = monitorProps;
   const classes = useStyles();
 
   return (
@@ -37,3 +37,5 @@ export const CustomDragPreview: React.FC<Props> = (props) => {
     </div>
   );
 };
+
+export default CustomDragPreview;
