@@ -25,9 +25,6 @@ const useStyles = makeStyles({
 const HierarchyNodes = () => {
   type Dispatcher<S> = Dispatch<SetStateAction<S>>;
   const [treeData, setTreeData] = useState<NodeModel[]>(NodesData);
-  const [selectedNode, setSelectedNode] = useState<NodeModel | undefined>(
-    undefined,
-  );
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const handleDrop = (newTree: NodeModel[], { dragSourceId }: any) => {
     let nodeSelected: NodeModel = newTree.find(
@@ -48,7 +45,7 @@ const HierarchyNodes = () => {
     setTreeData(newestTree);
   };
 
-  const toggled = produce((draft, id, text, level, endDate, memberArray) => {
+  const editNode = produce((draft, id, text, level, endDate, memberArray) => {
     const newTree = draft.find((tree: NodeModel) => tree.id === id);
     newTree.text = text;
     newTree.data.isDirtied = true;
@@ -57,9 +54,6 @@ const HierarchyNodes = () => {
     newTree.data.member = memberArray;
   });
 
-  const handleSelect = (node: NodeModel) => {
-    setSelectedNode(node);
-  };
   const handleTextChange = (
     id: NodeModel['id'],
     text: string,
@@ -67,14 +61,10 @@ const HierarchyNodes = () => {
     endDate: Date | string,
     member: IMember[],
   ) => {
-    const nextState = toggled(treeData, id, text, level, endDate, member);
+    const nextState = editNode(treeData, id, text, level, endDate, member);
 
     setTreeData(nextState);
   };
-
-  React.useEffect(() => {
-    console.log('TREE_DATA', treeData);
-  }, [treeData]);
   const classes = useStyles();
 
   const handleSubmit = (e: React.SyntheticEvent) => {
@@ -84,7 +74,7 @@ const HierarchyNodes = () => {
       name: 'Test1',
       nodes: treeData,
     };
-    console.log('DATA_SUBMIT', data);
+    console.log('DATA', data);
   };
 
   return (
@@ -98,18 +88,8 @@ const HierarchyNodes = () => {
             <CustomNode
               node={node}
               isOpen={isOpen}
-              isSelected={node.id === selectedNode?.id}
-              onSelect={handleSelect}
               onToggle={onToggle}
               onTextChange={handleTextChange}
-              selectedNode={selectedNode}
-              /* eslint-disable  @typescript-eslint/indent */
-              setSelectedNode={
-                setSelectedNode as Dispatcher<
-                  NodeModel<HierarchyData> | undefined
-                >
-              }
-              treeData={treeData as NodeModel<HierarchyData>[]}
               setTreeData={
                 setTreeData as Dispatcher<NodeModel<HierarchyData>[]>
               }

@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
+import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
@@ -15,13 +16,19 @@ import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import Tooltip from '@material-ui/core/Tooltip';
 import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
 import HighlightOffRoundedIcon from '@material-ui/icons/HighlightOffRounded';
 
 import { NodeModel, useDragOver } from '@minoru/react-dnd-treeview';
 import produce from 'immer';
-import { HierarchyData, HierarchyNodeModel, IMember } from '../types';
-import FunctionsData from '../data/functions.json';
+import {
+  HierarchyData,
+  HierarchyNodeModel,
+  IFunctions,
+  IMember,
+} from '../types';
+import functions from '../data/functions.data';
 import UsersData from '../data/users.json';
 import LevelsData from '../data/levels.json';
 import useFormStyles from '../styling/form.styles';
@@ -42,9 +49,7 @@ type Dispatcher<S> = Dispatch<SetStateAction<S>>;
 type Props = {
   node: HierarchyNodeModel;
   isOpen: boolean;
-  isSelected: boolean;
   onToggle: (id: NodeModel['id']) => void;
-  onSelect: (node: NodeModel) => void;
   onTextChange: (
     id: NodeModel['id'],
     text: string,
@@ -52,23 +57,15 @@ type Props = {
     endDate: Date | string,
     member: IMember[],
   ) => void;
-  selectedNode: NodeModel | undefined;
-  setSelectedNode: Dispatcher<NodeModel<HierarchyData> | undefined>;
-  treeData: NodeModel<HierarchyData>[];
   setTreeData: Dispatcher<NodeModel<HierarchyData>[]>;
 };
 
 const CustomNode: React.FC<Props> = ({
   node,
   onToggle,
-  onSelect,
-  treeData,
   setTreeData,
   onTextChange,
   isOpen,
-  selectedNode,
-  setSelectedNode,
-  isSelected,
 }: Props) => {
   const { id, text, data } = node;
   const [visibleInput, setVisibleInput] = useState(false);
@@ -80,8 +77,9 @@ const CustomNode: React.FC<Props> = ({
     data?.member.map((mem) => mem.user),
   );
   const [memberArray, setMemberArray] = useState(data?.member);
-  const [labelFunctionName, setLabelFunctionName] = useState('');
-
+  const [labelFunctionName, setLabelFunctionName] = useState(
+    data?.member.map((mem) => mem.function.functionName),
+  );
   const formClasses = useFormStyles();
 
   const handleToggle = (e: React.MouseEvent) => {
@@ -90,7 +88,6 @@ const CustomNode: React.FC<Props> = ({
   };
 
   const handleShowInput = () => {
-    onSelect(node);
     setVisibleInput(true);
   };
 
@@ -101,35 +98,80 @@ const CustomNode: React.FC<Props> = ({
 
   const handleAddNode = (e: React.FormEvent<{ value: unknown }>) => {
     e.preventDefault();
-    onSelect(node);
 
-    const newNode: HierarchyNodeModel = {
-      id: uuidv4(),
-      // parent: props.selectedNode!.id,
-      parent: id,
-      text: 'NEW NODE',
-      droppable: true,
-      data: {
-        isDirtied: true,
-        startDate: new Date().toISOString(),
-        endDate: undefined,
-        level: {
-          levelName: '',
-        },
-        member: [
-          {
-            function: { functionName: '', numberOfPosition: 0, owner: true },
-            user: '',
+    setTreeData(
+      produce((draft) => {
+        draft.push({
+          id: uuidv4(),
+          parent: id,
+          text: 'NEW NODE',
+          droppable: true,
+          data: {
+            isDirtied: true,
             startDate: new Date().toISOString(),
             endDate: undefined,
+            level: {
+              levelName: '',
+            },
+            member: [
+              {
+                function: {
+                  functionName: '',
+                  numberOfPosition: 0,
+                  owner: true,
+                },
+                user: '',
+                startDate: new Date().toISOString(),
+                endDate: undefined,
+              },
+            ],
           },
-        ],
-      },
-    };
-    const newestTree = [...treeData, newNode];
-    setTreeData(newestTree);
-    setSelectedNode(undefined);
+        });
+      }),
+    );
+
+    // const newNode: HierarchyNodeModel = {
+    //   id: uuidv4(),
+    //   parent: id,
+    //   text: 'NEW NODE',
+    //   droppable: true,
+    //   data: {
+    //     isDirtied: true,
+    //     startDate: new Date().toISOString(),
+    //     endDate: undefined,
+    //     level: {
+    //       levelName: '',
+    //     },
+    //     member: [
+    //       {
+    //         function: { functionName: '', numberOfPosition: 0, owner: true },
+    //         user: '',
+    //         startDate: new Date().toISOString(),
+    //         endDate: undefined,
+    //       },
+    //     ],
+    //   },
+    // };
+    // const newestTree = [...treeData, newNode];
+    // setTreeData(newestTree);
   };
+
+  const handleAddMember = React.useCallback(() => {
+    setMemberArray(
+      produce((draft) => {
+        draft?.push({
+          function: {
+            functionName: '',
+            numberOfPosition: 0,
+            owner: true,
+          },
+          user: '',
+          startDate: new Date().toISOString(),
+          endDate: undefined,
+        });
+      }),
+    );
+  }, []);
 
   const handleChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLabelText(e.target.value);
@@ -156,8 +198,23 @@ const CustomNode: React.FC<Props> = ({
     setMemberArray(nextState);
   };
 
-  const handleChangeFunction = (e: React.ChangeEvent<{ value: unknown }>) => {
-    setLabelFunctionName(e.target.value as string);
+  const handleChangeFunction = (
+    e: React.ChangeEvent<{ value: IFunctions | unknown }>,
+    idx: number,
+  ) => {
+    setMemberArray(
+      produce((draft) => {
+        const funcName = functions?.find(
+          (func: IFunctions) => func.functionName === e.target.value,
+        );
+        draft![idx].function = funcName as IFunctions;
+      }),
+    );
+    setLabelFunctionName(
+      produce((draft) => {
+        draft![idx] = e.target.value as string;
+      }),
+    );
   };
 
   const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,23 +235,6 @@ const CustomNode: React.FC<Props> = ({
 
   const dragOverProps = useDragOver(id, isOpen, onToggle);
   const classes = useStyles();
-
-  React.useEffect(() => {
-    console.log('node', node);
-    console.log('VISIBLE_INPUT', visibleInput);
-    console.log('SELECTED_NODE', selectedNode);
-    console.log('LABEL_TEXT', labelText);
-    console.log('LABEL_LEVEL', labelLevelName);
-    console.log('LABEL_USER', labelUserName);
-    console.log('MEMBER_ARRAY', memberArray);
-  }, [
-    node,
-    visibleInput,
-    selectedNode,
-    labelText,
-    labelLevelName,
-    memberArray,
-  ]);
 
   return (
     <Grid
@@ -256,17 +296,16 @@ const CustomNode: React.FC<Props> = ({
           {/* //TODO  4.  User: Select Box or TextField */}
 
           {memberArray?.map((mem, index) => (
-            <>
-              <Grid item xs='auto'>
+            <Box m={1} component='span' key={`select-boxes-${index}`}>
+              <Grid item xs='auto' key={`User-${mem.user}-${index}`}>
                 <FormControl className={formClasses.formControl}>
                   <InputLabel id='controlled-user-select-label'>
                     User {index}
                   </InputLabel>
                   <Select
                     labelId='controlled-user-select-label'
-                    id={`controlled-user-selec${index}`}
-                    key={`User-${index}`}
-                    value={labelUserName?.[index]}
+                    id={`controlled-user-select${index}`}
+                    value={labelUserName?.[index] || ''}
                     // defaultValue={mem.user}
                     onChange={(e) => {
                       handleChangeUser(e, index);
@@ -283,7 +322,12 @@ const CustomNode: React.FC<Props> = ({
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs='auto'>
+              <Divider orientation='vertical' flexItem />
+              <Grid
+                item
+                xs='auto'
+                key={`Function-${mem.function.functionName}-${index}`}
+              >
                 <FormControl className={formClasses.formControl}>
                   <InputLabel id='controlled-function-select-label'>
                     Functions {index}
@@ -291,14 +335,15 @@ const CustomNode: React.FC<Props> = ({
                   <Select
                     labelId='controlled-function-select-label'
                     id={`controlled-function-select${index}`}
-                    key={`Function-${index}`}
-                    value={mem.function.functionName}
-                    onChange={handleChangeFunction}
+                    value={labelFunctionName?.[index] || ''}
+                    onChange={(e) => {
+                      handleChangeFunction(e, index);
+                    }}
                   >
                     <MenuItem value=''>
                       <em>None</em>
                     </MenuItem>
-                    {FunctionsData.map((name, idx) => (
+                    {functions.map((name, idx) => (
                       <MenuItem key={idx} value={name.functionName}>
                         {name.functionName}
                       </MenuItem>
@@ -306,51 +351,77 @@ const CustomNode: React.FC<Props> = ({
                   </Select>
                 </FormControl>
               </Grid>
-            </>
+            </Box>
           ))}
           {/* //TODO  5.  Function: Select Box */}
           {/* SUBMIT: Finish Editing the item */}
 
           <Grid item xs='auto'>
-            <IconButton
-              size='small'
-              onClick={handleSubmit}
-              disabled={labelText === ''}
-            >
-              <CheckIcon />
-            </IconButton>
+            <Tooltip title='Finish'>
+              <IconButton
+                size='small'
+                onClick={handleSubmit}
+                disabled={labelText === ''}
+              >
+                <CheckIcon />
+              </IconButton>
+            </Tooltip>
           </Grid>
           {/* Cancel: Close the edit and don't save */}
           <Grid item xs='auto'>
-            <IconButton size='small' aria-label='close' onClick={handleCancel}>
-              <HighlightOffRoundedIcon />
-            </IconButton>
+            <Tooltip title='Cancel'>
+              <IconButton
+                color='secondary'
+                size='small'
+                aria-label='close'
+                onClick={handleCancel}
+              >
+                <HighlightOffRoundedIcon />
+              </IconButton>
+            </Tooltip>
           </Grid>
+          <Box m={1}>
+            <Grid item xs='auto'>
+              <Tooltip title='Add A Member'>
+                <IconButton
+                  size='small'
+                  aria-label='edit node'
+                  onClick={handleAddMember}
+                >
+                  <AddCircleOutlineOutlinedIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+          </Box>
         </>
       ) : (
         <>
-          <Grid item xs='auto' className={isSelected ? classes.node : ''}>
+          <Grid item xs='auto'>
             <Typography align='center' variant='h6'>
               {node.text}
             </Typography>
           </Grid>
           <Grid item xs='auto'>
-            <IconButton
-              size='small'
-              aria-label='edit node'
-              onClick={handleAddNode}
-            >
-              <AddCircleOutlineOutlinedIcon />
-            </IconButton>
+            <Tooltip title='Add New Node'>
+              <IconButton
+                size='small'
+                aria-label='edit node'
+                onClick={handleAddNode}
+              >
+                <AddCircleOutlineOutlinedIcon />
+              </IconButton>
+            </Tooltip>
           </Grid>
           <Grid item xs='auto'>
-            <IconButton
-              size='small'
-              aria-label='edit node'
-              onClick={handleShowInput}
-            >
-              <EditIcon />
-            </IconButton>
+            <Tooltip title='Edit Node'>
+              <IconButton
+                size='small'
+                aria-label='edit node'
+                onClick={handleShowInput}
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
           </Grid>
         </>
       )}

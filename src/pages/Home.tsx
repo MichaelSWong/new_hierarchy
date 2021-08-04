@@ -17,11 +17,6 @@ const Home = () => {
           Insert Nodes Tree
         </Button>
       </Box>
-      <Box m={1}>
-        <Button variant='outlined' component={Link} to='insert-nodes-form'>
-          Insert Nodes Form
-        </Button>
-      </Box>
     </Container>
   );
 };
