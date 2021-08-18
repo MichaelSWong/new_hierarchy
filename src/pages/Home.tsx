@@ -17,6 +17,11 @@ const Home = () => {
           Insert Nodes Tree
         </Button>
       </Box>
+      <Box m={1}>
+        <Button variant='outlined' component={Link} to='material-tree'>
+          Material Tree
+        </Button>
+      </Box>
     </Container>
   );
 };

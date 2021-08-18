@@ -12,6 +12,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import EditIcon from '@material-ui/icons/Edit';
 import InputLabel from '@material-ui/core/InputLabel';
+import FormGroup from '@material-ui/core/FormGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -181,22 +182,24 @@ const CustomNode: React.FC<Props> = ({
     setLabelLevelName(e.target.value as string);
   };
 
-  const handleChangeUser = (
-    e: React.ChangeEvent<{ value: unknown }>,
-    idx: number,
-  ) => {
-    const target = e.target.value as string;
-    const nextState = produce(memberArray, (draftState) => {
-      draftState![idx].user = target;
-    });
-    const nextStateLabel = produce(labelUserName, (draftState) => {
-      draftState![idx] = target;
-    });
+  const handleChangeUser = React.useCallback(
+    (e: React.ChangeEvent<{ value: unknown }>, idx: number) => {
+      const target = e.target.value as string;
 
-    setLabelUserName(nextStateLabel);
+      setLabelUserName(
+        produce((draft) => {
+          draft![idx] = target;
+        }),
+      );
 
-    setMemberArray(nextState);
-  };
+      setMemberArray(
+        produce((draft) => {
+          draft![idx].user = target;
+        }),
+      );
+    },
+    [],
+  );
 
   const handleChangeFunction = (
     e: React.ChangeEvent<{ value: IFunctions | unknown }>,
@@ -222,7 +225,7 @@ const CustomNode: React.FC<Props> = ({
     setEndDateCheck(new Date().toISOString());
   };
 
-  const handleSubmit = () => {
+  const handleFinish = () => {
     setVisibleInput(false);
     onTextChange(
       id,
@@ -256,17 +259,17 @@ const CustomNode: React.FC<Props> = ({
       {visibleInput ? (
         <>
           {/* 1.  nodeText: TextField */}
-          <Grid item xs='auto' className={formClasses.textfield}>
-            <TextField
-              label='Name'
-              value={labelText}
-              onChange={handleChangeText}
-            />
-          </Grid>
-          {/* 2.  levelName: Select Box */}
-          <Grid item xs='auto'>
-            <FormControl className={formClasses.formControl}>
-              <InputLabel id='controlled-levelName-select-label'>
+          <Box component='span'>
+            <Grid item xs='auto'>
+              <TextField
+                label='Name'
+                value={labelText}
+                onChange={handleChangeText}
+                className={formClasses.formControl}
+              />
+            </Grid>
+            <Grid item xs='auto'>
+              <InputLabel id='controlled-levelName-select-label' shrink>
                 Level Name
               </InputLabel>
               <Select
@@ -274,6 +277,7 @@ const CustomNode: React.FC<Props> = ({
                 id='controlled-levelName-select'
                 value={labelLevelName}
                 onChange={handleChangeLevel}
+                className={formClasses.formControl}
               >
                 <MenuItem value=''>
                   <em>None</em>
@@ -284,108 +288,106 @@ const CustomNode: React.FC<Props> = ({
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
-          </Grid>
-          {/* 3.  endDate: Checkbox */}
-          <Grid item xs='auto'>
-            <FormControlLabel
-              control={<Checkbox checked={checked} onChange={handleChecked} />}
-              label='EndDate'
-            />
-          </Grid>
-          {/* //TODO  4.  User: Select Box or TextField */}
-
-          {memberArray?.map((mem, index) => (
-            <Box m={1} component='span' key={`select-boxes-${index}`}>
-              <Grid item xs='auto' key={`User-${mem.user}-${index}`}>
-                <FormControl className={formClasses.formControl}>
-                  <InputLabel id='controlled-user-select-label'>
-                    User {index}
-                  </InputLabel>
-                  <Select
-                    labelId='controlled-user-select-label'
-                    id={`controlled-user-select${index}`}
-                    value={labelUserName?.[index] || ''}
-                    // defaultValue={mem.user}
-                    onChange={(e) => {
-                      handleChangeUser(e, index);
-                    }}
-                  >
-                    <MenuItem value=''>
-                      <em>None</em>
-                    </MenuItem>
-                    {UsersData.map((name, idx) => (
-                      <MenuItem key={idx} value={name.userName}>
-                        {name.userName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Divider orientation='vertical' flexItem />
-              <Grid
-                item
-                xs='auto'
-                key={`Function-${mem.function.functionName}-${index}`}
-              >
-                <FormControl className={formClasses.formControl}>
-                  <InputLabel id='controlled-function-select-label'>
-                    Functions {index}
-                  </InputLabel>
-                  <Select
-                    labelId='controlled-function-select-label'
-                    id={`controlled-function-select${index}`}
-                    value={labelFunctionName?.[index] || ''}
-                    onChange={(e) => {
-                      handleChangeFunction(e, index);
-                    }}
-                  >
-                    <MenuItem value=''>
-                      <em>None</em>
-                    </MenuItem>
-                    {functions.map((name, idx) => (
-                      <MenuItem key={idx} value={name.functionName}>
-                        {name.functionName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Box>
-          ))}
-          {/* //TODO  5.  Function: Select Box */}
-          {/* SUBMIT: Finish Editing the item */}
-
-          <Grid item xs='auto'>
-            <Tooltip title='Finish'>
-              <IconButton
-                size='small'
-                onClick={handleSubmit}
-                disabled={labelText === ''}
-              >
-                <CheckIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-          {/* Cancel: Close the edit and don't save */}
-          <Grid item xs='auto'>
-            <Tooltip title='Cancel'>
-              <IconButton
-                color='secondary'
-                size='small'
-                aria-label='close'
-                onClick={handleCancel}
-              >
-                <HighlightOffRoundedIcon />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-          <Box m={1}>
+            </Grid>
             <Grid item xs='auto'>
-              <Tooltip title='Add A Member'>
+              <FormControlLabel
+                control={
+                  <Checkbox checked={checked} onChange={handleChecked} />
+                }
+                label='EndDate'
+              />
+            </Grid>
+          </Box>
+
+          <FormControlLabel
+            value='info'
+            label=''
+            labelPlacement='top'
+            control={
+              <>
+                {memberArray?.map((mem, index) => (
+                  <Box component='span' key={index}>
+                    {/* <Grid item xs='auto' key={`User-${mem.user}-${index}`}> */}
+                    <FormControl className={formClasses.formControl}>
+                      <InputLabel id='controlled-user-select-label'>
+                        User {index}
+                      </InputLabel>
+                      <Select
+                        labelId='controlled-user-select-label'
+                        id={`controlled-user-select${index}`}
+                        value={labelUserName?.[index] || ''}
+                        // defaultValue={mem.user}
+                        onChange={(e) => {
+                          handleChangeUser(e, index);
+                        }}
+                      >
+                        <MenuItem value=''>
+                          <em>None</em>
+                        </MenuItem>
+                        {UsersData.map((name, idx) => (
+                          <MenuItem key={idx} value={name.userName}>
+                            {name.userName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl className={formClasses.formControl}>
+                      <InputLabel id='controlled-function-select-label'>
+                        Functions {index}
+                      </InputLabel>
+                      <Select
+                        labelId='controlled-function-select-label'
+                        id={`controlled-function-select${index}`}
+                        value={labelFunctionName?.[index] || ''}
+                        onChange={(e) => {
+                          handleChangeFunction(e, index);
+                        }}
+                      >
+                        <MenuItem value=''>
+                          <em>None</em>
+                        </MenuItem>
+                        {functions.map((name, idx) => (
+                          <MenuItem key={idx} value={name.functionName}>
+                            {name.functionName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {/* </Grid> */}
+                  </Box>
+                ))}
+              </>
+            }
+          />
+          <Box component='div'>
+            <Grid item xs='auto' className={formClasses.buttonMargin}>
+              <Tooltip title='Finish'>
                 <IconButton
                   size='small'
-                  aria-label='edit node'
+                  aria-label='finish'
+                  onClick={handleFinish}
+                >
+                  <CheckIcon />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title='Cancel' disableFocusListener>
+                <IconButton
+                  color='secondary'
+                  size='small'
+                  aria-label='close'
+                  onClick={handleCancel}
+                >
+                  <HighlightOffRoundedIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid item xs='auto' className={formClasses.memberMargin}>
+              <Tooltip title='Add Member' disableFocusListener>
+                <IconButton
+                  size='small'
+                  aria-label='add member'
                   onClick={handleAddMember}
                 >
                   <AddCircleOutlineOutlinedIcon />
@@ -393,6 +395,44 @@ const CustomNode: React.FC<Props> = ({
               </Tooltip>
             </Grid>
           </Box>
+
+          {/* <FormControlLabel
+            value='info'
+            label=''
+            labelPlacement='top'
+            control={
+              <>
+                <Tooltip title='Finish'>
+                  <IconButton
+                    size='small'
+                    onClick={handleFinish}
+                    disabled={labelText === ''}
+                  >
+                    <CheckIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title='Cancel'>
+                  <IconButton
+                    color='secondary'
+                    size='small'
+                    aria-label='close'
+                    onClick={handleCancel}
+                  >
+                    <HighlightOffRoundedIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title='Add A Member'>
+                  <IconButton
+                    size='small'
+                    aria-label='edit node'
+                    onClick={handleAddMember}
+                  >
+                    <AddCircleOutlineOutlinedIcon />
+                  </IconButton>
+                </Tooltip>
+              </>
+            }
+          /> */}
         </>
       ) : (
         <>

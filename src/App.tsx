@@ -6,6 +6,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from './styling/theme';
 import HierarchyNodes from './pages/HierarchyNodes';
 import Home from './pages/Home';
+import MaterialTree from './pages/MaterialTree';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
           <>
             <Container maxWidth='md'>
               <Route path='/insert-nodes-tree' component={HierarchyNodes} />
+              <Route path='/material-tree' component={MaterialTree} />
               <Route exact path='/' component={Home} />
             </Container>
           </>

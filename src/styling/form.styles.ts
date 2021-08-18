@@ -7,7 +7,7 @@ const useFormStyles = makeStyles((theme: Theme) =>
       maxWidth: 120,
     },
     formControl: {
-      // margin: theme.spacing(1),
+      margin: theme.spacing(1),
       minWidth: 120,
       maxWidth: 120,
     },
@@ -19,6 +19,9 @@ const useFormStyles = makeStyles((theme: Theme) =>
     },
     itemList: {
       fontsize: '3rem',
+    },
+    memberMargin: {
+      margin: theme.spacing(2),
     },
   }),
 );
