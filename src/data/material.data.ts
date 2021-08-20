@@ -7,6 +7,7 @@ const materialData: RenderTree = {
     {
       id: '1',
       name: 'Child - 1',
+      children: [],
     },
     {
       id: '3',
@@ -15,6 +16,7 @@ const materialData: RenderTree = {
         {
           id: '4',
           name: 'Child - 4',
+          children: [],
         },
         {
           id: '5',

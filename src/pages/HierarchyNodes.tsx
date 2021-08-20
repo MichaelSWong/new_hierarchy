@@ -1,9 +1,10 @@
-import React, { useState, Dispatch, SetStateAction } from 'react';
+import React, { useState, Dispatch, SetStateAction, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Tree,
   DragLayerMonitorProps,
   NodeModel,
+  OpenIdsHandlers,
 } from '@minoru/react-dnd-treeview';
 import produce from 'immer';
 import Box from '@material-ui/core/Box';
@@ -13,6 +14,8 @@ import CustomNode from '../components/CustomNode';
 import CustomDragPreview from '../components/CustomDragPreview';
 import styles from './HierarchyNodes.module.css';
 import NodesData from '../data/nodes.json';
+import SearchBar from '../components/SearchBar';
+import searchTerm from '../helpers/search';
 
 const useStyles = makeStyles({
   treeRoot: {
@@ -25,6 +28,12 @@ const useStyles = makeStyles({
 const HierarchyNodes = () => {
   type Dispatcher<S> = Dispatch<SetStateAction<S>>;
   const [treeData, setTreeData] = useState<NodeModel[]>(NodesData);
+
+  // TODO! UPDATE THIS
+  const ref = useRef<OpenIdsHandlers>(null);
+  // const handleOpenAll = () => ref.current.openAll();
+  const [search, setSearch] = useState('');
+  const [searchData, setSearchData] = useState<NodeModel[]>([]);
   /* eslint-disable  @typescript-eslint/no-explicit-any */
   const handleDrop = (newTree: NodeModel[], { dragSourceId }: any) => {
     let nodeSelected: NodeModel = newTree.find(
@@ -77,36 +86,123 @@ const HierarchyNodes = () => {
     console.log('DATA', data);
   };
 
+  console.log(
+    'TREE_DATA_SEARCH_EX',
+    treeData.filter((item: NodeModel) =>
+      item.text.toLowerCase().includes('gran'.toLowerCase()),
+    ),
+  );
+
+  // TODO! GET RID OF THIS!!
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    ref.current?.openAll();
+    const str = e.target.value;
+    setSearch(str);
+    const newArr = treeData
+      // .filter((item: NodeModel) =>
+      //   item.text.toLowerCase().includes(str.toLowerCase()),
+      // )
+      .map((item: NodeModel) => {
+        const newTitle = item.text.replace(
+          new RegExp(str, 'gi'),
+          (match) =>
+            `<mark style="background: #2769AA; color: white;">${match}</mark>`,
+        );
+
+        return {
+          ...item,
+          text: newTitle,
+        };
+      });
+
+    setSearchData(newArr);
+    // setTreeData(newArr);
+  };
+
+  React.useEffect(() => {
+    console.log('search', search);
+    console.log('searchData', searchData);
+  }, [search, searchData]);
+
+  console.log('HELPERS_DFS', searchTerm(treeData, 'par'));
+
   return (
     <>
       <div className={classes.treeRoot}>
-        <Tree
-          tree={treeData}
-          rootId='root'
-          // @ts-ignore
-          render={(node: NodeModel<HierarchyData>, { isOpen, onToggle }) => (
-            <CustomNode
-              node={node}
-              isOpen={isOpen}
-              onToggle={onToggle}
-              onTextChange={handleTextChange}
-              setTreeData={
-                setTreeData as Dispatcher<NodeModel<HierarchyData>[]>
-              }
-            />
-          )}
-          // @ts-ignore
-          dragPreviewRender={(
-            monitorProps: DragLayerMonitorProps<HierarchyData>,
-          ) => <CustomDragPreview monitorProps={monitorProps} />}
-          onDrop={handleDrop}
-          classes={{
-            draggingSource: styles.draggingSource,
-            dropTarget: styles.dropTarget,
-          }}
-          sort={false}
-          initialOpen
-        />
+        <SearchBar onInput={(e) => handleInput(e)} />
+        <span>
+          {searchData.length > 0 && searchData.length < treeData.length
+            ? searchData.length
+            : null}
+        </span>
+
+        {search.length > 0 ? (
+          <Tree
+            ref={ref}
+            tree={searchData}
+            rootId='root'
+            // @ts-ignore
+            render={(node: NodeModel<HierarchyData>, { isOpen, onToggle }) => (
+              <CustomNode
+                node={node}
+                isOpen={isOpen}
+                onToggle={onToggle}
+                onTextChange={handleTextChange}
+                setTreeData={
+                  setTreeData as Dispatcher<NodeModel<HierarchyData>[]>
+                }
+                setSearchData={
+                  setSearchData as Dispatcher<NodeModel<HierarchyData>[]>
+                }
+                setSearch={setSearch as Dispatcher<string>}
+              />
+            )}
+            // @ts-ignore
+            dragPreviewRender={(
+              monitorProps: DragLayerMonitorProps<HierarchyData>,
+            ) => <CustomDragPreview monitorProps={monitorProps} />}
+            onDrop={handleDrop}
+            classes={{
+              draggingSource: styles.draggingSource,
+              dropTarget: styles.dropTarget,
+            }}
+            sort={false}
+            initialOpen
+          />
+        ) : (
+          <Tree
+            ref={ref}
+            tree={treeData}
+            rootId='root'
+            // @ts-ignore
+            render={(node: NodeModel<HierarchyData>, { isOpen, onToggle }) => (
+              <CustomNode
+                node={node}
+                isOpen={isOpen}
+                onToggle={onToggle}
+                onTextChange={handleTextChange}
+                setTreeData={
+                  setTreeData as Dispatcher<NodeModel<HierarchyData>[]>
+                }
+                setSearchData={
+                  setSearchData as Dispatcher<NodeModel<HierarchyData>[]>
+                }
+                setSearch={setSearch as Dispatcher<string>}
+              />
+            )}
+            // @ts-ignore
+            dragPreviewRender={(
+              monitorProps: DragLayerMonitorProps<HierarchyData>,
+            ) => <CustomDragPreview monitorProps={monitorProps} />}
+            onDrop={handleDrop}
+            classes={{
+              draggingSource: styles.draggingSource,
+              dropTarget: styles.dropTarget,
+            }}
+            sort={false}
+            initialOpen
+          />
+        )}
       </div>
       <Box m={1}>
         <Button

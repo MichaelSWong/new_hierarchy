@@ -22,6 +22,16 @@ const Home = () => {
           Material Tree
         </Button>
       </Box>
+      <Box m={1}>
+        <Button variant='outlined' component={Link} to='combo-box'>
+          Combo Box
+        </Button>
+      </Box>
+      <Box m={1}>
+        <Button variant='outlined' component={Link} to='mat-tree'>
+          Mat Tree
+        </Button>
+      </Box>
     </Container>
   );
 };

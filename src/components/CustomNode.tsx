@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
-import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
@@ -12,7 +11,6 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import EditIcon from '@material-ui/icons/Edit';
 import InputLabel from '@material-ui/core/InputLabel';
-import FormGroup from '@material-ui/core/FormGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -59,6 +57,8 @@ type Props = {
     member: IMember[],
   ) => void;
   setTreeData: Dispatcher<NodeModel<HierarchyData>[]>;
+  setSearchData: Dispatcher<NodeModel<HierarchyData>[]>;
+  setSearch: Dispatcher<string>;
 };
 
 const CustomNode: React.FC<Props> = ({
@@ -67,6 +67,8 @@ const CustomNode: React.FC<Props> = ({
   setTreeData,
   onTextChange,
   isOpen,
+  setSearch,
+  setSearchData,
 }: Props) => {
   const { id, text, data } = node;
   const [visibleInput, setVisibleInput] = useState(false);
@@ -82,6 +84,12 @@ const CustomNode: React.FC<Props> = ({
     data?.member.map((mem) => mem.function.functionName),
   );
   const formClasses = useFormStyles();
+
+  // TODO! GET RID OF THIS
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
+  const createMarkup = (html: any) => {
+    return { __html: html };
+  };
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -226,6 +234,8 @@ const CustomNode: React.FC<Props> = ({
   };
 
   const handleFinish = () => {
+    setSearch('');
+    setSearchData([]);
     setVisibleInput(false);
     onTextChange(
       id,
@@ -437,9 +447,11 @@ const CustomNode: React.FC<Props> = ({
       ) : (
         <>
           <Grid item xs='auto'>
-            <Typography align='center' variant='h6'>
-              {node.text}
-            </Typography>
+            <Typography
+              align='center'
+              variant='h6'
+              dangerouslySetInnerHTML={createMarkup(node.text)}
+            />
           </Grid>
           <Grid item xs='auto'>
             <Tooltip title='Add New Node'>
