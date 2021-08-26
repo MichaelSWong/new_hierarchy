@@ -1,26 +1,43 @@
 import { NodeModel } from '@minoru/react-dnd-treeview';
+import { HierarchyData } from '../types';
 
 /**
  *
- * @param node: NodeModel[]
+ * @param data: NodeModel[]
  * @param term: string
- * @returns => string []
+ * @returns =>  Set<string>
  */
-const dfs = (node: NodeModel[], term: string) => {
-  // search functionallity
-  const nodeIds = node
-    .filter((item) => item.text.toLowerCase().includes(term.toLowerCase()))
-    .map((item) => item.id);
-  const parentIds = node
-    .filter((item) => item.text.toLowerCase().includes(term.toLowerCase()))
-    .map((item) => item.parent);
+const depthNodeSearch = (node: NodeModel<HierarchyData>[], term: string) => {
+  return node.reduce((newSet: Set<string>, item) => {
+    if (item.text.toLowerCase().includes(term.toLowerCase())) {
+      newSet.add(item.id as string);
+    }
+    item.data?.member.reduce((_, itemMember) => {
+      if (itemMember.user.toLowerCase().includes(term.toLowerCase())) {
+        newSet.add(item.id as string);
+      }
+      return _;
+    }, []);
 
-  let array3 = nodeIds.concat(parentIds);
-  array3 = array3.filter((item, index) => {
-    return array3.indexOf(item) === index;
-  });
+    return newSet;
+  }, new Set<string>());
+};
 
-  return array3;
+/**
+ *
+ * @param data: NodeModel[]
+ * @param set: Set<string>
+ * @returns => string[]
+ */
+const parentFinder = (node: NodeModel<HierarchyData>[], set: Set<string>) => {
+  for (let i = 0; i < set.size; i += 1) {
+    for (let j = 0; j < node.length; j += 1) {
+      if (set.has(node[j].id as string)) {
+        set.add(node[j].parent as string);
+      }
+    }
+  }
+  return Array.from(set) as string[];
 };
 
 /**
@@ -29,12 +46,25 @@ const dfs = (node: NodeModel[], term: string) => {
  * @param matchedIDS: string[]
  * @returns => NodeModel[]
  */
-const filter = (data: NodeModel[], matchedIDS: string[]) => {
-  return data
-    .filter((item) => matchedIDS.indexOf(item.id as string) > -1)
-    .map((item) => ({
-      ...item,
-    }));
+const filter = (
+  data: NodeModel<HierarchyData>[],
+  matchedIDS: string[],
+  term: string,
+) => {
+  return data.reduce((newArray: NodeModel<HierarchyData>[], item) => {
+    if (matchedIDS.includes(item.id as string)) {
+      const newTitle = item.text.replace(
+        new RegExp(term, 'gi'),
+        (match) =>
+          `<mark style="background: #2769AA; color: white;">${match}</mark>`,
+      );
+      newArray.push({
+        ...item,
+        text: newTitle,
+      });
+    }
+    return newArray;
+  }, []);
 };
 
 /**
@@ -43,9 +73,10 @@ const filter = (data: NodeModel[], matchedIDS: string[]) => {
  * @param term: string
  * @returns => NodeModel[]
  */
-const searchTerm = (data: NodeModel[], term: string) => {
-  const matchedIDS = dfs(data, term);
-  return filter(data, matchedIDS as string[]);
+const searchTerm = (data: NodeModel<HierarchyData>[], term: string) => {
+  const IDS = depthNodeSearch(data, term);
+  const matchedIDS = parentFinder(data, IDS);
+  return filter(data, matchedIDS, term);
 };
 
 export default searchTerm;

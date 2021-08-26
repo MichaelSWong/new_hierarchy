@@ -13,7 +13,7 @@ import { HierarchyData, HierarchyNodeModel, IMember } from '../types';
 import CustomNode from '../components/CustomNode';
 import CustomDragPreview from '../components/CustomDragPreview';
 import styles from './HierarchyNodes.module.css';
-import NodesData from '../data/nodes.json';
+import NodesData from '../data/nodes.data';
 import SearchBar from '../components/SearchBar';
 import searchTerm from '../helpers/search';
 
@@ -26,8 +26,11 @@ const useStyles = makeStyles({
 });
 
 const HierarchyNodes = () => {
+  /* eslint-disable @typescript-eslint/indent */
   type Dispatcher<S> = Dispatch<SetStateAction<S>>;
-  const [treeData, setTreeData] = useState<NodeModel[]>(NodesData);
+  const [treeData, setTreeData] = useState<
+    NodeModel[] | NodeModel<HierarchyData>[]
+  >(NodesData);
 
   // TODO! UPDATE THIS
   const ref = useRef<OpenIdsHandlers>(null);
@@ -98,24 +101,26 @@ const HierarchyNodes = () => {
     ref.current?.openAll();
     const str = e.target.value;
     setSearch(str);
-    const newArr = treeData
-      // .filter((item: NodeModel) =>
-      //   item.text.toLowerCase().includes(str.toLowerCase()),
-      // )
-      .map((item: NodeModel) => {
-        const newTitle = item.text.replace(
-          new RegExp(str, 'gi'),
-          (match) =>
-            `<mark style="background: #2769AA; color: white;">${match}</mark>`,
-        );
+    // const newArr = treeData
+    //   // .filter((item: NodeModel) =>
+    //   //   item.text.toLowerCase().includes(str.toLowerCase()),
+    //   // )
+    //   .map((item: NodeModel) => {
+    //     const newTitle = item.text.replace(
+    //       new RegExp(str, 'gi'),
+    //       (match) =>
+    //         `<mark style="background: #2769AA; color: white;">${match}</mark>`,
+    //     );
 
-        return {
-          ...item,
-          text: newTitle,
-        };
-      });
+    //     return {
+    //       ...item,
+    //       text: newTitle,
+    //     };
+    //   });
 
-    setSearchData(newArr);
+    const newestTree = searchTerm(treeData as NodeModel<HierarchyData>[], str);
+
+    setSearchData(newestTree);
     // setTreeData(newArr);
   };
 
@@ -123,8 +128,6 @@ const HierarchyNodes = () => {
     console.log('search', search);
     console.log('searchData', searchData);
   }, [search, searchData]);
-
-  console.log('HELPERS_DFS', searchTerm(treeData, 'par'));
 
   return (
     <>
