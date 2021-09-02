@@ -56,7 +56,7 @@ const filter = (
       const newTitle = item.text.replace(
         new RegExp(term, 'gi'),
         (match) =>
-          `<mark style="background: #2769AA; color: white;">${match}</mark>`,
+          `<mark style="background: #2769AA; color: white;">${match.toUpperCase()}</mark>`,
       );
       newArray.push({
         ...item,

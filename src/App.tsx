@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import MaterialTree from './pages/MaterialTree';
 import ComboBox from './pages/ComboBox';
 import MatTree from './pages/MatTree';
+import FormExample from './pages/FormExample';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
               <Route path='/material-tree' component={MaterialTree} />
               <Route path='/combo-box' component={ComboBox} />
               <Route path='/mat-tree' component={MatTree} />
+              <Route path='/form-example' component={FormExample} />
               <Route exact path='/' component={Home} />
             </Container>
           </>

@@ -31,6 +31,11 @@ const Home = () => {
           Mat Tree
         </Button>
       </Box>
+      <Box m={1}>
+        <Button variant='outlined' component={Link} to='form-example'>
+          Form Example
+        </Button>
+      </Box>
     </Container>
   );
 };

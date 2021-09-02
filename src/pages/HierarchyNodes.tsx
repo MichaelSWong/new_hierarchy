@@ -4,7 +4,7 @@ import {
   Tree,
   DragLayerMonitorProps,
   NodeModel,
-  OpenIdsHandlers,
+  TreeMethods,
 } from '@minoru/react-dnd-treeview';
 import produce from 'immer';
 import Box from '@material-ui/core/Box';
@@ -16,6 +16,7 @@ import styles from './HierarchyNodes.module.css';
 import NodesData from '../data/nodes.data';
 import SearchBar from '../components/SearchBar';
 import searchTerm from '../helpers/search';
+import { NodesSchema } from '../interfaces/schemas';
 
 const useStyles = makeStyles({
   treeRoot: {
@@ -33,7 +34,7 @@ const HierarchyNodes = () => {
   >(NodesData);
 
   // TODO! UPDATE THIS
-  const ref = useRef<OpenIdsHandlers>(null);
+  const ref = useRef<TreeMethods>(null);
   // const handleOpenAll = () => ref.current.openAll();
   const [search, setSearch] = useState('');
   const [searchData, setSearchData] = useState<NodeModel[]>([]);
@@ -79,14 +80,17 @@ const HierarchyNodes = () => {
   };
   const classes = useStyles();
 
-  const handleSubmit = (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     // Submit Handler for Insert Nodes
     const data = {
       name: 'Test1',
-      nodes: treeData,
+      nodes: treeData as NodeModel<HierarchyData>[],
     };
-    console.log('DATA', data);
+    const valid = await NodesSchema.isValid(data);
+    if (valid) {
+      console.log(data);
+    }
   };
 
   console.log(
@@ -142,7 +146,7 @@ const HierarchyNodes = () => {
         {search.length > 0 ? (
           <Tree
             ref={ref}
-            tree={searchData}
+            tree={searchData as NodeModel<HierarchyData>[]}
             rootId='root'
             // @ts-ignore
             render={(node: NodeModel<HierarchyData>, { isOpen, onToggle }) => (
@@ -175,7 +179,7 @@ const HierarchyNodes = () => {
         ) : (
           <Tree
             ref={ref}
-            tree={treeData}
+            tree={treeData as NodeModel<HierarchyData>[]}
             rootId='root'
             // @ts-ignore
             render={(node: NodeModel<HierarchyData>, { isOpen, onToggle }) => (
